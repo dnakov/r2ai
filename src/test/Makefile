@@ -1,6 +1,6 @@
 CC=gcc
-CFLAGS=-g -Wall -I.. -I. -std=c99 -DTEST_MODE=1
-LDFLAGS=-lcmocka
+CFLAGS=-g -Wall -I.. -I. -std=c99 -DTEST_MODE=1 -D_GNU_SOURCE
+LDFLAGS=-lcmocka -lm
 R2_CFLAGS=$(shell pkg-config --cflags r_core)
 R2_LDFLAGS=$(shell pkg-config --libs r_core)
 
