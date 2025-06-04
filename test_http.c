@@ -8,61 +8,81 @@
 
 #include <r_core.h>
 #include "../r2ai.h"
+#include "test_mocks.h"
 
-// Test: Basic HTTP functionality (parameter validation)
+// Mock the actual HTTP function during testing
+#ifdef TEST_MODE
+#define r2ai_http_post mock_r2ai_http_post
+#endif
+
+// Test: Basic HTTP functionality with mocks
 void test_http_basic(void **state) {
     (void) state;
 
+    enable_mocks();
+    
     int code = 0;
     int rlen = 0;
     
+    // Setup a mock response
+    setup_http_mock("{\"status\": \"ok\"}", 200, 16);
+    
+    // Test with valid parameters
+    char *result = r2ai_http_post("http://example.com", NULL, "test data", &code, &rlen);
+    assert_non_null(result);
+    assert_int_equal(code, 200);
+    assert_int_equal(rlen, 16);
+    assert_string_equal(result, "{\"status\": \"ok\"}");
+    free(result);
+
     // Test with NULL parameters (should handle gracefully)
-    char *result = r2ai_http_post(NULL, NULL, NULL, &code, &rlen);
-    // Should handle NULL gracefully - exact behavior depends on implementation
-    // The main requirement is that it doesn't crash
-    if (result) {
-        free(result);
-    }
+    result = r2ai_http_post(NULL, NULL, NULL, &code, &rlen);
+    assert_null(result);
 
-    // Test with NULL code parameter  
-    result = r2ai_http_post("http://example.com", NULL, "test", NULL, &rlen);
-    if (result) {
-        free(result);
-    }
-
-    // Test with NULL rlen parameter
-    result = r2ai_http_post("http://example.com", NULL, "test", &code, NULL);
-    if (result) {
-        free(result);
-    }
+    cleanup_mocks();
+    disable_mocks();
 }
 
-// Test: HTTP POST parameter validation
+// Test: HTTP POST with different scenarios
 void test_http_post(void **state) {
     (void) state;
 
+    enable_mocks();
+    
     int code = 0;
     int rlen = 0;
     
-    // Test with empty URL (should fail gracefully)
-    char *result = r2ai_http_post("", NULL, "test data", &code, &rlen);
-    // Should handle empty URL gracefully without crashing
-    if (result) {
-        free(result);
-    }
+    // Test error response
+    setup_http_mock("{\"error\": \"Not found\"}", 404, 20);
+    
+    char *result = r2ai_http_post("http://example.com/notfound", NULL, "test", &code, &rlen);
+    assert_non_null(result);
+    assert_int_equal(code, 404);
+    assert_string_equal(result, "{\"error\": \"Not found\"}");
+    free(result);
 
-    // Test with invalid URL format
-    result = r2ai_http_post("not-a-url", NULL, "test data", &code, &rlen);
-    // Should handle invalid URL gracefully without crashing
-    if (result) {
-        free(result);
-    }
+    // Test empty response
+    setup_http_mock("", 200, 0);
+    
+    result = r2ai_http_post("http://example.com/empty", NULL, "", &code, &rlen);
+    assert_non_null(result);
+    assert_int_equal(code, 200);
+    assert_int_equal(rlen, 0);
+    free(result);
 
-    // Test with empty data
-    result = r2ai_http_post("http://example.com", NULL, "", &code, &rlen);
-    if (result) {
-        free(result);
-    }
+    // Test large response
+    const char *large_response = "{\"data\": \"This is a longer response with more content\"}";
+    setup_http_mock(large_response, 200, strlen(large_response));
+    
+    result = r2ai_http_post("http://example.com/large", NULL, "test", &code, &rlen);
+    assert_non_null(result);
+    assert_int_equal(code, 200);
+    assert_int_equal(rlen, strlen(large_response));
+    assert_string_equal(result, large_response);
+    free(result);
+
+    cleanup_mocks();
+    disable_mocks();
 }
 
 // ... existing code ...

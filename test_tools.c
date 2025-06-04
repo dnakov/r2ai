@@ -8,6 +8,7 @@
 
 #include <r_core.h>
 #include "../r2ai.h"
+#include "test_mocks.h"
 
 // Test: Basic tools functionality
 void test_tools_basic(void **state) {
