@@ -66,5 +66,66 @@ uninstall:
 
 r2check:
 	@r2 -qcq --
+
+# Testing targets
+test: all
+	@echo "Running unit tests..."
+	@if [ -d test ]; then \
+		$(MAKE) -C test test; \
+	else \
+		echo "Test directory not found. Run 'make setup-tests' first."; \
+	fi
+
+test-coverage: all
+	@echo "Generating coverage report..."
+	@if [ -d test ]; then \
+		$(MAKE) -C test coverage; \
+	else \
+		echo "Test directory not found. Run 'make setup-tests' first."; \
+	fi
+
+test-install-deps:
+	@echo "Installing test dependencies..."
+	@if [ -d test ]; then \
+		$(MAKE) -C test install-deps; \
+	else \
+		echo "Test directory not found. Please create test/ directory first."; \
+	fi
+
+test-clean:
+	@if [ -d test ]; then \
+		$(MAKE) -C test clean; \
+	fi
+
+setup-tests:
+	@echo "Setting up test environment..."
+	@echo "Test framework should be available in test/ directory"
+	@echo "Run the following commands to get started:"
+	@echo "  cd test"
+	@echo "  make install-deps"
+	@echo "  make test"
+
 clean:
 	rm -f *.o *.d
+	@if [ -d test ]; then \
+		$(MAKE) -C test clean; \
+	fi
+
+.PHONY: all try user-install user-uninstall install uninstall clean test test-coverage test-install-deps test-clean setup-tests
+
+help:
+	@echo "Available targets:"
+	@echo "  all              - Build the r2ai plugin"
+	@echo "  try              - Build and install for testing"
+	@echo "  user-install     - Install plugin for current user"
+	@echo "  user-uninstall   - Uninstall user plugin"
+	@echo "  install          - Install plugin system-wide"
+	@echo "  uninstall        - Uninstall system plugin"
+	@echo "  clean            - Clean build artifacts"
+	@echo ""
+	@echo "Testing targets:"
+	@echo "  test             - Run unit tests"
+	@echo "  test-coverage    - Generate coverage report"
+	@echo "  test-install-deps - Install testing dependencies"
+	@echo "  test-clean       - Clean test artifacts"
+	@echo "  setup-tests      - Show setup instructions"

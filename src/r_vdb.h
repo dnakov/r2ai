@@ -1,6 +1,8 @@
 #ifndef R_VDB_H
 #define R_VDB_H 1
 
+#include <r_core.h>
+
 /* Vector of floats with `dim` dimensions */
 typedef struct {
 	float *data;

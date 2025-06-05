@@ -1,6 +1,3 @@
-.PHONY: all all.old deps clean deps-global pub lint cilint
-.PHONY: install uninstall user-install user-uninstall
-
 CC=gcc
 CFLAGS=-g -Wall -I.. -I. -std=c99 -DTEST_MODE=1 -D_GNU_SOURCE
 LDFLAGS=-lcmocka -lm
@@ -12,7 +9,7 @@ SRC_DIR=..
 SOURCES=$(SRC_DIR)/messages.c $(SRC_DIR)/tools.c $(SRC_DIR)/vdb.c $(SRC_DIR)/markdown.c $(SRC_DIR)/r2ai_http.c
 
 # Test files
-TEST_SOURCES=test_messages.c test_tools.c test_vdb.c test_markdown.c test_http.c test_main.c test_mocks.c
+TEST_SOURCES=test_messages.c test_tools.c test_vdb.c test_markdown.c test_http.c test_main.c
 
 # Object files
 OBJECTS=$(SOURCES:.c=.o)
@@ -57,7 +54,3 @@ help:
 	@echo "  coverage   - Generate coverage report"
 	@echo "  clean      - Clean build artifacts"
 	@echo "  install-deps - Install testing dependencies"
-
-mrproper:
-	$(MAKE) clean
-
